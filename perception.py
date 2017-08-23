@@ -17,12 +17,37 @@ def color_thresh(img, rgb_thresh=(160, 160, 160)):
     # Return the binary image
     return color_select
 
+def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
+    # Create an array of zeros same xy size as img, but single channel
+    color_select = np.zeros_like(img[:,:,0])
+    # Require that each pixel be above all three threshold values in RGB
+    # above_thresh will now contain a boolean array with "True"
+    # where threshold was met
+    below_thresh = (img[:,:,0] < rgb_thresh[0]) \
+                & (img[:,:,1] < rgb_thresh[1]) \
+                & (img[:,:,2] < rgb_thresh[2])
+    # Index the array of zeros with the boolean array and set to 1
+    color_select[below_thresh] = 1
+    # Return the binary image
+    return color_select
+
+# Rock Sample
+def rock_thresh(img):
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    lower_yellow = np.array([20,100,100])
+    upper_yellow = np.array([40,255,255])
+    # Threshold the HSV image to get only yellow colors
+    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    #  Bitwise-AND mask and original image
+    rock = cv2.bitwise_and(img,img, mask= mask)
+    return rock[:,:,0]  #return binary image
+
 # Define a function to convert from image coords to rover coords
 def rover_coords(binary_img):
     # Identify nonzero pixels
     ypos, xpos = binary_img.nonzero()
-    # Calculate pixel positions with reference to the rover position being at the 
-    # center bottom of the image.  
+    # Calculate pixel positions with reference to the rover position being at the
+    # center bottom of the image.
     x_pixel = -(ypos - binary_img.shape[0]).astype(np.float)
     y_pixel = -(xpos - binary_img.shape[1]/2 ).astype(np.float)
     return x_pixel, y_pixel
