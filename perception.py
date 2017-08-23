@@ -55,7 +55,7 @@ def rover_coords(binary_img):
 
 # Define a function to convert to radial coords in rover space
 def to_polar_coords(x_pixel, y_pixel):
-    # Convert (x_pixel, y_pixel) to (distance, angle) 
+    # Convert (x_pixel, y_pixel) to (distance, angle)
     # in polar coordinates in rover space
     # Calculate distance to each pixel
     dist = np.sqrt(x_pixel**2 + y_pixel**2)
@@ -68,16 +68,16 @@ def rotate_pix(xpix, ypix, yaw):
     # Convert yaw to radians
     yaw_rad = yaw * np.pi / 180
     xpix_rotated = (xpix * np.cos(yaw_rad)) - (ypix * np.sin(yaw_rad))
-                            
+
     ypix_rotated = (xpix * np.sin(yaw_rad)) + (ypix * np.cos(yaw_rad))
-    # Return the result  
+    # Return the result
     return xpix_rotated, ypix_rotated
 
-def translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale): 
+def translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale):
     # Apply a scaling and a translation
     xpix_translated = (xpix_rot / scale) + xpos
     ypix_translated = (ypix_rot / scale) + ypos
-    # Return the result  
+    # Return the result
     return xpix_translated, ypix_translated
 
 
@@ -96,21 +96,36 @@ def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
 
 # Define a function to perform a perspective transform
 def perspect_transform(img, src, dst):
-           
+
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(img, M, (img.shape[1], img.shape[0]))# keep same size as input image
-    
+
     return warped
 
 
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
     # Perform perception steps to update Rover()
-    # TODO: 
+    # TODO:
     # NOTE: camera image is coming to you in Rover.img
     # 1) Define source and destination points for perspective transform
+    ddst_size = 5
+    # Set a bottom offset to account for the fact that the bottom of the image
+    # is not the position of the rover but a bit in front of it
+    # this is just a rough guess, feel free to change it!
+    bottom_offset = 6
+    source = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
+    destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
+                    [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
+                    [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                    [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                    ])
     # 2) Apply perspective transform
+    warped = perspect_transform(Rover.img, source, destination)
     # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
+    navigable = color_thresh(warped)
+    obstacle = obstacle_thresh(warped)
+    rock = rock_thresh(warped)
     # 4) Update Rover.vision_image (this will be displayed on left side of screen)
         # Example: Rover.vision_image[:,:,0] = obstacle color-thresholded binary image
         #          Rover.vision_image[:,:,1] = rock_sample color-thresholded binary image
@@ -127,8 +142,8 @@ def perception_step(Rover):
     # Update Rover pixel distances and angles
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
-    
- 
-    
-    
+
+
+
+
     return Rover
