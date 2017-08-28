@@ -103,6 +103,9 @@ def perspect_transform(img, src, dst):
 
     return warped, mask
 
+def limit_range(xpix, ypix, range = 50):
+    dist = np.sqrt(xpix**2+ypix**2)
+    return xpix[dist < range], ypix[dist < range]
 
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
@@ -144,6 +147,10 @@ def perception_step(Rover):
     xpix_obs, ypix_obs = rover_coords(obstacle)
     xpix_rock, ypix_rock = rover_coords(rock)
 
+    xpix_nav, ypix_nav = limit_range(xpix_nav, ypix_nav)
+    xpix_obs, ypix_obs = limit_range(xpix_obs, ypix_obs)
+    xpix_rock, ypix_rock = limit_range(xpix_rock, ypix_rock)
+
     # 6) Convert rover-centric pixel values to world coordinates
     scale = 2 * dst_size
     # self.pos = None # Current position (x, y)
@@ -151,6 +158,8 @@ def perception_step(Rover):
     xpos = Rover.pos[0]
     ypos = Rover.pos[1]
     yaw = Rover.yaw
+    roll = Rover.roll
+    pitch = Rover.pitch
     world_size = Rover.worldmap.shape[0]
 
     x_nav_world, y_nav_world = pix_to_world(xpix_nav, ypix_nav, xpos, ypos, yaw, world_size, scale)
@@ -161,10 +170,14 @@ def perception_step(Rover):
         # Example: Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
         #          Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
-    Rover.worldmap[y_obs_world, x_obs_world, 0] += 1
-    Rover.worldmap[y_rock_world, x_rock_world, 1] += 1 #Need this to indicate rock detection
-    Rover.worldmap[y_nav_world, x_nav_world, 2] += 10  #more bias to nagigable terrain
 
+    if ((roll < 0.5) or (roll > 355)) and ((pitch < 0.5) or (pitch > 355)):  #only under the map when roll/pitch < 0.5, i.e. when it is not shaky
+        # Rover.worldmap[y_obs_world, x_obs_world, 0] += 1
+        Rover.worldmap[y_rock_world, x_rock_world, 1] += 1 #Need this to indicate rock detection
+        # Rover.worldmap[y_nav_world, x_nav_world, 2] += 10  #more bias to nagigable terrain
+        #GC since we limit the range, should be always trust what we see now?
+        Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
+        Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
     # 8) Convert rover-centric pixel positions to polar coordinates
     # Update Rover pixel distances and angles
         # Rover.nav_dists = rover_centric_pixel_distances
