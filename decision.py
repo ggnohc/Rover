@@ -7,7 +7,11 @@ def decision_step(Rover):
 
     #GC not following left wall, why??
         #yes it did but need more change
-    near_wall = 0  #drive at center for now
+    #GC deviate mean angel by 5 degrees
+    #10 is not a bad value
+    #11 is ok too
+    #12.5 will hit wall maybe too close
+    near_wall = 0
 
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
@@ -15,9 +19,10 @@ def decision_step(Rover):
 
     # Example:
     # Check if we have vision data to make decisions with
+
     if Rover.nav_angles is not None:
         rover_mean_angle = np.mean(Rover.nav_angles * 180/np.pi)
-    if Rover.nav_angles is not None:
+        rover_std_dev = np.std(Rover.nav_angles)
         # Check for Rover.mode status
         if Rover.mode == 'forward':
             # Check the extent of navigable terrain
@@ -31,13 +36,10 @@ def decision_step(Rover):
                     Rover.throttle = 0
                 Rover.brake = 0
                 # Set steering to average angle clipped to the range +/- 15
-                #GC deviate mean angel by 5 degrees
-                #10 is not a bad value
-                #11 is ok too
-                #12.5 will hit wall maybe too close
-                rover_mean_angle = np.mean(Rover.nav_angles * 180/np.pi)
                 Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) + near_wall
-                print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
+                # Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev, -15, 15)
+                # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
+                print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
             #GC
             #While moving, if found rock then stop and pick it up
             #If near a sample, then stop Rover so that it can pick up rock
@@ -49,9 +51,9 @@ def decision_step(Rover):
                 Rover.brake = Rover.brake_set
                 Rover.steer = 0
                 Rover.mode = 'stop'
-                if Rover.vel == 0:
-                    Rover.picking_up = True
-                return Rover
+                # if Rover.vel == 0:
+                #     Rover.picking_up = True
+                # return Rover
 
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
@@ -87,7 +89,8 @@ def decision_step(Rover):
                     # Set steer to mean angle
                     #GC do same here
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) + near_wall
-                    print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
+                    # Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev, -15, 15)
+                    print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
                     Rover.mode = 'forward'
     # Just to make the rover do something
     # even if no modifications have been made to the code
