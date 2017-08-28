@@ -8,10 +8,13 @@ def decision_step(Rover):
     #GC not following left wall, why??
         #yes it did but need more change
     #GC deviate mean angel by 5 degrees
+    # 5 able to pass minimal requirement
     #10 is not a bad value
-    #11 is ok too
+    #11 is ok as able to come near to wall and pick up rock, but sacrifice on fidelity when it comes too close to wall
     #12.5 will hit wall maybe too close
-    near_wall = 0
+
+    #after adding "limit_range" routine, can come closer to wall without sacrificing too much on fidelity
+    near_wall = 15
 
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
@@ -36,8 +39,8 @@ def decision_step(Rover):
                     Rover.throttle = 0
                 Rover.brake = 0
                 # Set steering to average angle clipped to the range +/- 15
-                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) + near_wall
-                # Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev, -15, 15)
+                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
+                # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
                 # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
                 print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
             #GC
@@ -88,8 +91,8 @@ def decision_step(Rover):
                     Rover.brake = 0
                     # Set steer to mean angle
                     #GC do same here
-                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15) + near_wall
-                    # Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev, -15, 15)
+                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
+                    # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
                     print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
                     Rover.mode = 'forward'
     # Just to make the rover do something
