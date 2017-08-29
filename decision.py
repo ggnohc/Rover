@@ -2,6 +2,37 @@ import numpy as np
 from random import randint
 import time
 
+def snap_rover_state(Rover):
+    #check for last state since Rover updated
+    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, time.time())
+    print("snap_rover_state -> Rover.snap: {}".format(Rover.snap))
+
+    return Rover
+
+def update_recorded_movement(Rover):
+  # Check if we've sufficiently moved, if we did, update latest recorded position
+
+  if Rover.pos[0] and Rover.pos[1] and Rover.yaw:
+    cond1 = np.absolute(Rover.snap[0] - Rover.pos[0]) > 2
+    cond2 = np.absolute(Rover.snap[1] - Rover.pos[1]) > 2
+    cond3 = np.absolute(Rover.snap[2] - Rover.yaw) % 360 > 2
+    Rover.sufficient_movement = cond1 or cond2 or cond3
+
+  if Rover.sufficient_movement:
+    print("Rover moved: Update snap positions")
+    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, Rover.total_time)
+    Rover.sufficient_movement = False
+
+  return Rover
+
+
+def check_if_stuck(Rover):
+
+  stuck_cond1 =  Rover.vel == 0 and np.absolute(Rover.throttle) > 0
+  stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.sufficient_movement
+  is_stuck = (stuck_cond1 or stuck_cond2) and not Rover.near_sample
+
+  return is_stuck
 
 
 # This is where you can build a decision tree for determining throttle, brake and steer
@@ -27,8 +58,10 @@ def decision_step(Rover):
     # Check if we have vision data to make decisions with
 
     if Rover.nav_angles is not None:
-        rover_mean_angle = np.mean(Rover.nav_angles * 180/np.pi)
-        rover_std_dev = np.std(Rover.nav_angles)
+        # rover_mean_angle = np.mean(Rover.nav_angles * 180/np.pi)
+        # rover_std_dev = np.std(Rover.nav_angles)
+
+        Rover = snap_rover_state(Rover)
 
         # Check for Rover.mode status
         if Rover.mode == 'forward':
@@ -46,7 +79,7 @@ def decision_step(Rover):
                 Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
                 # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
                 # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
-                print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
+                # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
                     # Set mode to "stop" and hit the brakes!
@@ -69,13 +102,18 @@ def decision_step(Rover):
                 # if Rover.vel == 0:
                 #     Rover.picking_up = True
                 # return Rover
-            if (np.absolute(Rover.snap[0] - Rover.pos[0]) < 2) and \
-               (np.absolute(Rover.snap[1] - Rover.pos[1]) <2) and \
-               (np.absolute(Rover.snap[2] - Rover.yaw) < 2) and \
-               (Rover.snap[3] - time.time() > 10) and \
-               (Rover.near_sample != 1):
-               Rover.mode = 'stuck'
-
+            #GC in place of check_if_stuck
+            # print("Rover.snap: {}; Rover.near_sample: {}".format(Rover.snap, Rover.near_sample))
+            # print("Rover.pos: {}; Rover.yaw: {}; time: {}".format(Rover.pos, Rover.yaw, time.time()))
+            # if (np.absolute(Rover.snap[0] - Rover.pos[0]) < 2) and \
+            #    (np.absolute(Rover.snap[1] - Rover.pos[1]) <2) and \
+            #    (np.absolute(Rover.snap[2] - Rover.yaw)%360 < 2) and \
+            # #    (Rover.snap[3] - time.time() > 10) and \
+            #    (Rover.near_sample != 1):
+            #    Rover.mode = 'stuck'
+            if check_if_stuck(Rover):
+                print("Rover stuck!")
+                Rover.mode = 'stuck'
 
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
@@ -103,10 +141,11 @@ def decision_step(Rover):
                     #GC do same here
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
                     # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
-                    print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
+                    # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
                     Rover.mode = 'forward'
         elif Rover.mode == 'stuck':
-            Rover.steer = randint(-15,15)  #if in stuck stake, turn randomly hoping to get out of it
+            steer = randint(-15,15)  #if in stuck stake, turn randomly hoping to get out of it
+            Rover.brake, Rover.throttle, Rover.steer, Rover.mode = 0, 0, steer, 'forward'
 
     # Just to make the rover do something
     # even if no modifications have been made to the code
@@ -121,9 +160,6 @@ def decision_step(Rover):
     if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
         Rover.send_pickup = True
 
-
-    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, time.time())
-    print("Rover.snap: {}".format(Rover.snap))
 
 
     return Rover
