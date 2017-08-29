@@ -103,7 +103,7 @@ def perspect_transform(img, src, dst):
 
     return warped, mask
 
-def limit_range(xpix, ypix, range = 50):
+def limit_range(xpix, ypix, range = 85):
     dist = np.sqrt(xpix**2+ypix**2)
     return xpix[dist < range], ypix[dist < range]
 

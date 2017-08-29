@@ -144,7 +144,8 @@ def decision_step(Rover):
                     # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
                     Rover.mode = 'forward'
         elif Rover.mode == 'stuck':
-            steer = randint(-15,15)  #if in stuck stake, turn randomly hoping to get out of it
+            # steer = randint(-15,-10)  #if in stuck stake, turn randomly hoping to get out of it
+            steer = -15 # since default is cling to left wall, turn to max right if stuck to get out
             Rover.brake, Rover.throttle, Rover.steer, Rover.mode = 0, 0, steer, 'forward'
 
     # Just to make the rover do something
