@@ -1,4 +1,3 @@
-=======
 ## Project: Search and Sample Return
 ### Writeup Template: You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
 
@@ -42,13 +41,11 @@
 
 #### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
 
-You're reading it!
 
 ### Notebook Analysis
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
-Here is an example of how to include an image in your writeup.
 
-##### 1.1 By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
+* By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
 
 **Rock sample 1**
 ![Rock sample 1][example_rock1]
@@ -62,24 +59,51 @@ Here is an example of how to include an image in your writeup.
 ![Recorded data rock][my_rock]
 ![Recorded data rock thresh][my_rock_thresh]
 
-##### 1.2  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
+*  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
 
 #### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
-And another! 
 
-##### 2.1 
-Utilizing core routine defined in notebook, the picture read by rover went through perspective transform, from which navigable terrain, obstacle and rock is filtered through respective color thresh hold define.  Respective pixels is then converted to rover centric coordintates, and then mapped to world coordinates.
+* Utilizing core routine defined in notebook, the picture read by rover went through perspective transform, from which navigable terrain, obstacle and rock is filtered through respective color thresh hold define.  Respective pixels is then converted to rover centric coordintates, and then mapped to world coordinates.
 
-The 3 color threshold is then overlay and mapped to a world map on RGB color scheme, with red, blue and green channel representing obstable, navigable terrain and rock sample respectively.
+* The 3 color threshold is then overlay and mapped to a world map on RGB color scheme, with red, blue and green channel representing obstable, navigable terrain and rock sample respectively.
 
-![alt text][image2]
+
 ### Autonomous Navigation and Mapping
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
 
+* "perception_step()" is basically added by populating routine added earlier in Jupyter Notebook, except we need to make use of the mean direction of navigable terrain, but again this is already defined in the Notebook.
+
+* "decision_step()" is already populated with some basic function, but lack handling exception case such as when the rover is stuck between rock or even one of the wheel is obstructed, it will just keep trying to move forward.  Also the default is to move at the mean angle whereby there are clearest path, although this allow the rock to be detected, the distance is too far away for the rover ("near_sample" variable will almost always set to "0") to allow it to pick up the rock.
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
 **Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines!  Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by `drive_rover.py`) in your writeup when you submit the project so your reviewer can reproduce your results.**
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+
+* The basic function allows the rover to navigate automonously, but to meet the requirement of mapping the terrain of 40% with 60% fidelity more changes is needed
+  * Since rock will be scattered randomly around the wall, a "wall clinging" approach will be utilized by adding a bias variable to the rover steer angle, using "near_wall" variable in code below:
+  
+    `Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)`
+
+* This works reasonably well, but at some point the rover will hit some nasty wall edge and this shakes the camera causing fidelity to deteriorate over time.  Below approach was used to keep fidelity relatively stable beyond 70%:
+  * Limit the range of the rover to not update if the view is beyond certain range, I choose 85 meter but this can be much less.
+  
+  ```
+    def limit_range(xpix, ypix, range = 85):
+      dist = np.sqrt(xpix**2+ypix**2)
+      return xpix[dist < range], ypix[dist < range]
+  ```
+  
+  * Do not update the rover worldmap when the roll and pitch angle is +/- 5 degree, which is basically when the camera is shaky
+  
+  ```
+      if ((roll < 0.5) or (roll > 355)) and ((pitch < 0.5) or (pitch > 355)):  #only under the map when roll/pitch < 0.5, i.e. when it is not shaky
+        # Rover.worldmap[y_obs_world, x_obs_world, 0] += 1
+        Rover.worldmap[y_rock_world, x_rock_world, 1] += 1 #Need this to indicate rock detection
+        #since we limit the range, should be always trust what we see now.
+        Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
+        Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
+ ``` 
+
