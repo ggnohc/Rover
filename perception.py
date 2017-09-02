@@ -99,7 +99,7 @@ def perspect_transform(img, src, dst):
 
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(img, M, (img.shape[1], img.shape[0]))# keep same size as input image
-    mask = cv2.warpPerspective(np.ones_like(img[:,:,0]), M, (img.shape[1], img.shape[0]))  #GC find out more what this does
+    mask = cv2.warpPerspective(np.ones_like(img[:,:,0]), M, (img.shape[1], img.shape[0]))
 
     return warped, mask
 
@@ -175,7 +175,7 @@ def perception_step(Rover):
         # Rover.worldmap[y_obs_world, x_obs_world, 0] += 1
         Rover.worldmap[y_rock_world, x_rock_world, 1] += 1 #Need this to indicate rock detection
         # Rover.worldmap[y_nav_world, x_nav_world, 2] += 10  #more bias to nagigable terrain
-        #GC since we limit the range, should be always trust what we see now?
+        #since we limit the range, should be always trust what we see now.
         Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
         Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
     # 8) Convert rover-centric pixel positions to polar coordinates

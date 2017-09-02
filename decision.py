@@ -16,20 +16,20 @@ def update_recorded_movement(Rover):
     cond1 = np.absolute(Rover.snap[0] - Rover.pos[0]) > 2
     cond2 = np.absolute(Rover.snap[1] - Rover.pos[1]) > 2
     cond3 = np.absolute(Rover.snap[2] - Rover.yaw) % 360 > 2
-    Rover.sufficient_movement = cond1 or cond2 or cond3
+    Rover.moved = cond1 or cond2 or cond3
 
-  if Rover.sufficient_movement:
+  if Rover.moved:
     print("Rover moved: Update snap positions")
     Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, Rover.total_time)
-    Rover.sufficient_movement = False
+    Rover.moved = False
 
   return Rover
 
 
-def check_if_stuck(Rover):
+def stuck_check(Rover):
 
   stuck_cond1 =  Rover.vel == 0 and np.absolute(Rover.throttle) > 0
-  stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.sufficient_movement
+  stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.moved
   is_stuck = (stuck_cond1 or stuck_cond2) and not Rover.near_sample
 
   return is_stuck
@@ -39,16 +39,8 @@ def check_if_stuck(Rover):
 # commands based on the output of the perception_step() function
 def decision_step(Rover):
 
-    #GC not following left wall, why??
-        #yes it did but need more change
-    #GC deviate mean angel by 5 degrees
-    # 5 able to pass minimal requirement
-    #10 is not a bad value
-    #11 is ok as able to come near to wall and pick up rock, but sacrifice on fidelity when it comes too close to wall
-    #12.5 will hit wall maybe too close
-
     #after adding "limit_range" routine, can come closer to wall without sacrificing too much on fidelity
-    near_wall = 15
+    near_wall = 15   #variable defining how bias towards one side, +ve value will recline more to left wall
 
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
@@ -77,9 +69,7 @@ def decision_step(Rover):
                 Rover.brake = 0
                 # Set steering to average angle clipped to the range +/- 15
                 Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
-                # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
-                # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}".format(Rover.mode, Rover.steer, rover_mean_angle))
-                # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
+
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
                     # Set mode to "stop" and hit the brakes!
@@ -88,7 +78,7 @@ def decision_step(Rover):
                     Rover.brake = Rover.brake_set
                     Rover.steer = 0
                     Rover.mode = 'stop'
-            #GC
+
             #While moving, if found rock then stop and pick it up
             #If near a sample, then stop Rover so that it can pick up rock
             if Rover.near_sample == 1:
@@ -102,16 +92,8 @@ def decision_step(Rover):
                 # if Rover.vel == 0:
                 #     Rover.picking_up = True
                 # return Rover
-            #GC in place of check_if_stuck
-            # print("Rover.snap: {}; Rover.near_sample: {}".format(Rover.snap, Rover.near_sample))
-            # print("Rover.pos: {}; Rover.yaw: {}; time: {}".format(Rover.pos, Rover.yaw, time.time()))
-            # if (np.absolute(Rover.snap[0] - Rover.pos[0]) < 2) and \
-            #    (np.absolute(Rover.snap[1] - Rover.pos[1]) <2) and \
-            #    (np.absolute(Rover.snap[2] - Rover.yaw)%360 < 2) and \
-            # #    (Rover.snap[3] - time.time() > 10) and \
-            #    (Rover.near_sample != 1):
-            #    Rover.mode = 'stuck'
-            if check_if_stuck(Rover):
+
+            if stuck_check(Rover):
                 print("Rover stuck!")
                 Rover.mode = 'stuck'
 
@@ -138,10 +120,8 @@ def decision_step(Rover):
                     # Release the brake
                     Rover.brake = 0
                     # Set steer to mean angle
-                    #GC do same here
+
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)
-                    # Rover.steer = np.mean(Rover.nav_angles * 180/np.pi)+ 0.2*rover_std_dev
-                    # print("Rover.mode: {}, Rover.steer: {}, rover_mean_angle: {}, 0.2*rover_std_dev: {}".format(Rover.mode, Rover.steer, rover_mean_angle, 0.2*rover_std_dev))
                     Rover.mode = 'forward'
         elif Rover.mode == 'stuck':
             # steer = randint(-15,-10)  #if in stuck stake, turn randomly hoping to get out of it
