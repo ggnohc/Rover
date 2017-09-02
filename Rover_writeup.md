@@ -25,6 +25,13 @@
 [image1]: ./misc/rover_image.jpg
 [image2]: ./calibration_images/example_grid1.jpg
 [image3]: ./calibration_images/example_rock1.jpg 
+[example_rock1]: ./calibration_images/example_rock1.jpg
+[example_rock2]: ./calibration_images/example_rock2.jpg
+[my_rock]: ./calibration_images/my_rock.jpg
+[example_rock1_thresh]: ./calibration_images/example_rock1_thresh.jpg
+[example_rock2_thresh]: ./calibration_images/example_rock2_thresh.jpg
+[my_rock_thresh]: ./calibration_images/my_rock_thresh.jpg
+
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -40,7 +47,17 @@ You're reading it!
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 Here is an example of how to include an image in your writeup.
 
-![alt text][image1]
+![Rock sample 1][example_rock1]
+
+![Rock sample 1 threshed][example_rock1_thresh]
+
+![Rock sample 2][example_rock2]
+
+![Rock sample 2 thresh][example_rock2_thresh]
+
+![Recorded data rock][my_rock]
+
+![Recorded data rock thresh][my_rock_thresh]
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And another! 
