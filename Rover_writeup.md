@@ -87,18 +87,18 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
   
     `Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)`
 
-* This works reasonably well, but at some point the rover will hit some nasty wall edge and this shakes the camera causing fidelity to deteriorate over time.  Below approach was used to keep fidelity relatively stable beyond 70%:
-  * Limit the range of the rover to not update if the view is beyond certain range, I choose 85 meter but this can be much less.
+  * This works reasonably well, but at some point the rover will hit some nasty wall edge and this shakes the camera causing fidelity to deteriorate over time.  Below approach was used to keep fidelity relatively stable beyond 70%:
+* Limit the range of the rover to not update if the view is beyond certain range, I choose 85 meter but this can be much less.
   
-  ```
+  ```python
     def limit_range(xpix, ypix, range = 85):
       dist = np.sqrt(xpix**2+ypix**2)
       return xpix[dist < range], ypix[dist < range]
   ```
   
-  * Do not update the rover worldmap when the roll and pitch angle is +/- 5 degree, which is basically when the camera is shaky
+* Do not update the rover worldmap when the roll and pitch angle is +/- 5 degree, which is basically when the camera is shaky
   
-  ```
+  ```python
       if ((roll < 0.5) or (roll > 355)) and ((pitch < 0.5) or (pitch > 355)):  #only under the map when roll/pitch < 0.5, i.e. when it is not shaky
         # Rover.worldmap[y_obs_world, x_obs_world, 0] += 1
         Rover.worldmap[y_rock_world, x_rock_world, 1] += 1 #Need this to indicate rock detection
@@ -107,8 +107,8 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
         Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
  ``` 
  
-  * To allow the rover to come out from stuck condition, and new rover attribute called "Rover.snap" is added to record the state of the rover at particular time:
-    ```
+* To allow the rover to come out from stuck condition, and new rover attribute called "Rover.snap" is added to record the state of the rover at particular time:
+    ```python
     def snap_rover_state(Rover):
     #check for last state since Rover updated
     Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, time.time())
@@ -117,9 +117,10 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
     return Rover
     ```
     
-  * This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
-  * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py" so that the variable will be displayed on bottom right of the screen real time:
-    ```
+* This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
+
+* To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py" so that the variable will be displayed on bottom right of the screen real time:
+    ```python
     #GC add Rover state
       cv2.putText(map_add,"  Rover Mode: "+str(Rover.mode), (0, 100),
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
@@ -129,5 +130,6 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
     ```
 
 ##### *Challenges and future improvement*
+
 * Although this approach has help to meet the minimum requirement and beyond, more tweaking can be done to improve the time requirement, maybe by speeding it up when the path is clear, and also keeping another map of visited area so that it will only navigate an area once.
 * The rover will only pick up rock occasionally when the rock is near and speed of the rover is slow at corners.  Need to add code to slow down the rover when it detect rock ahead.
