@@ -47,23 +47,29 @@ You're reading it!
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 Here is an example of how to include an image in your writeup.
 
-#### 1.1 By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
-![Rock sample 1][example_rock1]
+##### 1.1 By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
 
+**Rock sample 1**
+![Rock sample 1][example_rock1]
 ![Rock sample 1 threshed][example_rock1_thresh]
 
+**Rock sample 2**
 ![Rock sample 2][example_rock2]
-
 ![Rock sample 2 thresh][example_rock2_thresh]
 
+**Recorded data rock**
 ![Recorded data rock][my_rock]
-
 ![Recorded data rock thresh][my_rock_thresh]
 
-#### 1.2  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
+##### 1.2  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
 
-#### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
+#### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And another! 
+
+##### 2.1 
+Utilizing core routine defined in notebook, the picture read by rover went through perspective transform, from which navigable terrain, obstacle and rock is filtered through respective color thresh hold define.  Respective pixels is then converted to rover centric coordintates, and then mapped to world coordinates.
+
+The 3 color threshold is then overlay and mapped to a world map on RGB color scheme, with red, blue and green channel representing obstable, navigable terrain and rock sample respectively.
 
 ![alt text][image2]
 ### Autonomous Navigation and Mapping
