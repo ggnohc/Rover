@@ -83,7 +83,7 @@
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
 * The basic function allows the rover to navigate automonously, but to meet the requirement of mapping the terrain of 40% with 60% fidelity more changes is needed
-  * Since rock will be scattered randomly around the wall, a "wall clinging" approach will be utilized by adding a bias variable to the rover steer angle, using "near_wall" variable in code below:
+  * Since rock will be scattered randomly around the wall, a "left wall clinging" approach will be utilized by adding a bias variable to the rover steer angle, using "near_wall" variable in code below:
   
     `Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + near_wall, -15, 15)`
 
@@ -106,4 +106,22 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
         Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
         Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
  ``` 
+  * To allow the rover to come out from stuck condition, and new rover attribute called "Rover.snap" is added to record the state of the rover at particular time:
+    ```
+    def snap_rover_state(Rover):
+    #check for last state since Rover updated
+    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, time.time())
+    print("snap_rover_state -> Rover.snap: {}".format(Rover.snap))
 
+    return Rover
+    ```
+    This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
+  * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py"
+    ```
+    #GC add Rover state
+      cv2.putText(map_add,"  Rover Mode: "+str(Rover.mode), (0, 100),
+                 cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+      #GC add near_sample
+      cv2.putText(map_add,"  Near Sample: "+str(Rover.near_sample), (0, 115),
+                 cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    ```
