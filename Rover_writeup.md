@@ -106,6 +106,7 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
         Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
         Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
  ``` 
+ 
   * To allow the rover to come out from stuck condition, and new rover attribute called "Rover.snap" is added to record the state of the rover at particular time:
     ```
     def snap_rover_state(Rover):
@@ -115,8 +116,9 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
 
     return Rover
     ```
-    This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
-  * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py"
+    
+  * This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
+  * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py" so that the variable will be displayed on bottom right of the screen real time:
     ```
     #GC add Rover state
       cv2.putText(map_add,"  Rover Mode: "+str(Rover.mode), (0, 100),
@@ -125,3 +127,7 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
       cv2.putText(map_add,"  Near Sample: "+str(Rover.near_sample), (0, 115),
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     ```
+
+##### *Challenges and future improvement*
+* Although this approach has help to meet the minimum requirement and beyond, more tweaking can be done to improve the time requirement, maybe by speeding it up when the path is clear, and also keeping another map of visited area so that it will only navigate an area once.
+* The rover will only pick up rock occasionally when the rock is near and speed of the rover is slow at corners.  Need to add code to slow down the rover when it detect rock ahead.
