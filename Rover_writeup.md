@@ -105,7 +105,7 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
         #since we limit the range, should be always trust what we see now.
         Rover.worldmap[y_obs_world, x_obs_world, 0] = 255
         Rover.worldmap[y_nav_world, x_nav_world, 2] = 255
- ``` 
+  ``` 
  
 * To allow the rover to come out from stuck condition, and new rover attribute called "Rover.snap" is added to record the state of the rover at particular time:
     ```python
