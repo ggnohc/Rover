@@ -31,6 +31,7 @@
 [example_rock1_thresh]: ./calibration_images/example_rock1_thresh.jpg
 [example_rock2_thresh]: ./calibration_images/example_rock2_thresh.jpg
 [my_rock_thresh]: ./calibration_images/my_rock_thresh.jpg
+[autonomous]: ./misc/autonomous_driving.png
 
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
@@ -155,7 +156,7 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     ```
 
-#### [Autonomous driving] (https://youtu.be/qtIJT3uy-3c)
+#### [Autonomous driving ![automonous]] (https://youtu.be/qtIJT3uy-3c)
 
 ##### *Challenges and future improvement*
 
