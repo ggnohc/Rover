@@ -148,6 +148,32 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     
 * This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
 
+    ``` python
+    def update_recorded_movement(Rover):
+ 
+  if Rover.pos[0] and Rover.pos[1] and Rover.yaw:
+    cond1 = np.absolute(Rover.snap[0] - Rover.pos[0]) > 2
+    cond2 = np.absolute(Rover.snap[1] - Rover.pos[1]) > 2
+    cond3 = np.absolute(Rover.snap[2] - Rover.yaw) % 360 > 2
+    Rover.moved = cond1 or cond2 or cond3
+
+  if Rover.moved:
+    print("Rover moved: Update snap positions")
+    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, Rover.total_time)
+    Rover.moved = False
+
+  return Rover
+
+
+def stuck_check(Rover):
+
+  stuck_cond1 =  Rover.vel == 0 and np.absolute(Rover.throttle) > 0
+  stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.moved
+  is_stuck = (stuck_cond1 or stuck_cond2) and not Rover.near_sample
+
+  return is_stuck
+   ```
+
 * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py" so that the variable will be displayed on bottom right of the screen real time:
     ```python
       cv2.putText(map_add,"  Rover Mode: "+str(Rover.mode), (0, 100),
@@ -156,9 +182,10 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     ```
 
+#### Autonomous Driving video
 #### [![Autonomous Driving](./misc/autonomous_driving.png)](https://youtu.be/qtIJT3uy-3c)
 
-##### *Challenges and future improvement*
+#### *Challenges and future improvement*
 
 * Although this approach has help to meet the minimum requirement and beyond, more tweaking can be done to improve the time requirement, maybe by speeding it up when the path is clear, and also keeping another map of visited area so that it will only navigate an area once.
 * The rover will only pick up rock occasionally when the rock is near and speed of the rover is slow at corners.  Need to add code to slow down the rover when it detect rock ahead.
