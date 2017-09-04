@@ -148,31 +148,32 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     
 * This attribute is then used to determine if the rover is moving, by checking on rover x,y coordinate and yaw angle changes within certain time period. It is determine to be in "stuck" mode if those parameters has not changed, and it will be instructed to move to the right (since I am using "left wall clinging" approach this will likely move it out from "stuck" mode).
 
-    ``` python
+    ```python
     def update_recorded_movement(Rover):
  
-  if Rover.pos[0] and Rover.pos[1] and Rover.yaw:
-    cond1 = np.absolute(Rover.snap[0] - Rover.pos[0]) > 2
-    cond2 = np.absolute(Rover.snap[1] - Rover.pos[1]) > 2
-    cond3 = np.absolute(Rover.snap[2] - Rover.yaw) % 360 > 2
-    Rover.moved = cond1 or cond2 or cond3
+    if Rover.pos[0] and Rover.pos[1] and Rover.yaw:
+      cond1 = np.absolute(Rover.snap[0] - Rover.pos[0]) > 2
+      cond2 = np.absolute(Rover.snap[1] - Rover.pos[1]) > 2
+      cond3 = np.absolute(Rover.snap[2] - Rover.yaw) % 360 > 2
+      Rover.moved = cond1 or cond2 or cond3
 
-  if Rover.moved:
-    print("Rover moved: Update snap positions")
-    Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, Rover.total_time)
-    Rover.moved = False
+    if Rover.moved:
+      print("Rover moved: Update snap positions")
+      Rover.snap = (Rover.pos[0], Rover.pos[1], Rover.yaw, Rover.total_time)
+      Rover.moved = False
 
-  return Rover
+    return Rover
+    ```
 
+    ```python
+    def stuck_check(Rover):
 
-def stuck_check(Rover):
+      stuck_cond1 =  Rover.vel == 0 and np.absolute(Rover.throttle) > 0
+      stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.moved
+      is_stuck = (stuck_cond1 or stuck_cond2) and not Rover.near_sample
 
-  stuck_cond1 =  Rover.vel == 0 and np.absolute(Rover.throttle) > 0
-  stuck_cond2 = Rover.total_time - Rover.snap[3] > 2 and not Rover.moved
-  is_stuck = (stuck_cond1 or stuck_cond2) and not Rover.near_sample
-
-  return is_stuck
-   ```
+      return is_stuck
+    ```
 
 * To help debug the code by determining the state of the rover, I added more text output in "supporting_function.py" so that the variable will be displayed on bottom right of the screen real time:
     ```python
