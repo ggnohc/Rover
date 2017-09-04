@@ -184,7 +184,7 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     ```
 
 ### And then the final result ...
-#### Autonomous Driving video
+#### Autonomous Driving video with 4x speed up
 #### [![Autonomous Driving](./misc/autonomous_driving.png)](https://youtu.be/qtIJT3uy-3c)
 
 #### *Challenges and future improvement*
