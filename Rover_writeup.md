@@ -46,6 +46,33 @@
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 
 * By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
+
+``` python
+def rock_thresh(img):
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    lower_yellow = np.array([20,100,100])
+    upper_yellow = np.array([40,255,255])
+    # Threshold the HSV image to get only yellow colors
+    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    #  Bitwise-AND mask and original image
+    rock = cv2.bitwise_and(img,img, mask= mask)
+    return rock[:,:,0]  #return binary image
+```
+
+**Rock sample 1**
+![Rock sample 1][example_rock1]
+![Rock sample 1 threshed][example_rock1_thresh]
+
+**Rock sample 2**
+![Rock sample 2][example_rock2]
+![Rock sample 2 thresh][example_rock2_thresh]
+
+**Recorded data rock**
+![Recorded data rock][my_rock]
+![Recorded data rock thresh][my_rock_thresh]
+
+
+*  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
 ``` python
 def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     # Create an array of zeros same xy size as img, but single channel
@@ -61,34 +88,7 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     # Return the binary image
     return color_select
 ```
-**Rock sample 1**
-![Rock sample 1][example_rock1]
-![Rock sample 1 threshed][example_rock1_thresh]
 
-**Rock sample 2**
-![Rock sample 2][example_rock2]
-![Rock sample 2 thresh][example_rock2_thresh]
-
-**Recorded data rock**
-![Recorded data rock][my_rock]
-![Recorded data rock thresh][my_rock_thresh]
-
-
-# Rock Sample
-
-*  The obstacle detection is relatively simple, i.e. anything other than navigable is considered an obstacle.
-
-``` python
-def rock_thresh(img):
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-    lower_yellow = np.array([20,100,100])
-    upper_yellow = np.array([40,255,255])
-    # Threshold the HSV image to get only yellow colors
-    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
-    #  Bitwise-AND mask and original image
-    rock = cv2.bitwise_and(img,img, mask= mask)
-    return rock[:,:,0]  #return binary image
-```
 
 #### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 
@@ -108,8 +108,6 @@ def rock_thresh(img):
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
 **Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines!  Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by `drive_rover.py`) in your writeup when you submit the project so your reviewer can reproduce your results.**
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
 * The basic function allows the rover to navigate automonously, but to meet the requirement of mapping the terrain of 40% with 60% fidelity more changes is needed
   * Since rock will be scattered randomly around the wall, a "left wall clinging" approach will be utilized by adding a bias variable to the rover steer angle, using "near_wall" variable in code below:
