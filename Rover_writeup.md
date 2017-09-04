@@ -96,6 +96,7 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
 
 * The 3 color threshold is then overlay and mapped to a world map on RGB color scheme, with red, blue and green channel representing obstable, navigable terrain and rock sample respectively.
 
+* The code was tested against my own recorded output and mapped as in this [Youtube video](https://youtu.be/DUcUU9hGKuM)
 
 ### Autonomous Navigation and Mapping
 
@@ -153,6 +154,8 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
       cv2.putText(map_add,"  Near Sample: "+str(Rover.near_sample), (0, 115),
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     ```
+
+#### [Autonomous driving] (https://youtu.be/qtIJT3uy-3c)
 
 ##### *Challenges and future improvement*
 
