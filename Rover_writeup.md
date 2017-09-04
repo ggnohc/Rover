@@ -156,7 +156,7 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     ```
 
-#### [Autonomous driving ![automonous]] (https://youtu.be/qtIJT3uy-3c)
+#### [![Autonomous Driving](./misc/autonomous_driving.png)](https://youtu.be/qtIJT3uy-3c)
 
 ##### *Challenges and future improvement*
 
