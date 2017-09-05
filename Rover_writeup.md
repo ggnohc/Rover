@@ -33,7 +33,6 @@
 [my_rock_thresh]: ./calibration_images/my_rock_thresh.jpg
 [autonomous]: ./misc/autonomous_driving.png
 
-
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
@@ -46,7 +45,7 @@
 ### Notebook Analysis
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 
-* By consulting the following [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
+* By consulting this [tutorial](http://docs.opencv.org/3.2.0/df/d9d/tutorial_py_colorspaces.html), was able to determine the appropriate color range for yellow.  Tested on "example_rock1.jpg" (rock in open area), "example_rock2.jpg" (rock in shade) and my own recorded data, the thresh hold is showing positive result, i.e. able to detect the whole rock, and rock only.  I used the recommended method and change the color scheme from RGB to HSV.
 
 ``` python
 def rock_thresh(img):
@@ -97,7 +96,9 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
 
 * The 3 color threshold is then overlay and mapped to a world map on RGB color scheme, with red, blue and green channel representing obstable, navigable terrain and rock sample respectively.
 
-* The code was tested against my own recorded output and mapped as in this [Youtube video](https://youtu.be/DUcUU9hGKuM)
+* The code was tested against my own recorded output and mapped as in video below:
+
+[![Youtube video](./misc/mapping.png)](https://youtu.be/DUcUU9hGKuM)
 
 ### Autonomous Navigation and Mapping
 
